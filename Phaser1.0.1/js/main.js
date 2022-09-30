@@ -80,8 +80,6 @@ class Ingame2 extends Phaser.Scene
     preload()
     {
         // Create assets
-        this.cameras.main.setBackgroundColor("#00F");
-
         this.load.image('grassbackg', 'assets/images/grass.png');
         this.load.spritesheet('link', 'assets/images/link.png', { frameWidth:120, frameHeight: 130});
     }
@@ -130,7 +128,7 @@ class Ingame2 extends Phaser.Scene
     {
         // Update assets
 
-        var moveSpeed = 1;
+        var moveSpeed = 2;
         var bgMoveSpeed = 1;
         if (_cursors.right.isDown) {
             _link.anims.play('right', true);
@@ -161,7 +159,8 @@ class Ingame2 extends Phaser.Scene
             }
         }
         else {
-            _link.anims.pause();
+            //_link.anims.pause();
+            _link.setFrame(0);
         }
         
     }
