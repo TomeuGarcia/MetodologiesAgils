@@ -2,7 +2,10 @@
 
 var gamePrefs =
 {
-    SPACESHIP_SPEED: 2
+    SPACESHIP_SPEED: 4,
+    SPEED_BULLET: -100,
+    SPEED_ENEMY: 50,
+    SPACESHIP_BRAKE: 3
 }
 
 
@@ -27,7 +30,7 @@ var config =
         arcade:
         {
             gravity:{y:0},
-            debug:true
+            //debug:true 
         }
     }
 
