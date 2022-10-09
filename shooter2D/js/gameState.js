@@ -18,6 +18,8 @@ class gameState extends Phaser.Scene
         this.load.spritesheet('spaceship', 'naveAnim.png', {frameWidth:16, frameHeight: 24});
         this.load.image('bullet', 'spr_bullet_0.png');
         this.load.spritesheet('enemySpaceship', 'enemy-medium.png', {frameWidth:32, frameHeight:16});
+        this.load.image('enemyBullet', 'spr_enemy_bullet_0.png');
+        this.load.spritesheet('powerUp', 'spr_power_up.png', {frameWidth:16, frameHeight:16});
     }
 
     create()
@@ -31,16 +33,15 @@ class gameState extends Phaser.Scene
         this.loadPools();
         this.loadAnimations();        
 
-        this.cursorKeys = this.input.keyboard.createCursorKeys();
+        this.canShoot = true;
 
-        this.shootingTimer = this.time.addEvent(
+        this.cursorKeys = this.input.keyboard.createCursorKeys();
+        this.cursorKeys.space.on('up', function(event)
             {
-                delay: 200,
-                callback: this.createBullet,
-                callbackScope: this,
-                repeat: -1
-            }
-        );
+                if (this.canShoot)
+                    this.createBullet();
+            }, this
+        )
 
         this.enemySpawnTimer = this.time.addEvent(
             {
@@ -50,28 +51,63 @@ class gameState extends Phaser.Scene
                 repeat: -1
             }
         )
+        this.autoShootBulletsTimer = this.time.addEvent(
+            {
+                delay: 200,
+                callback: this.createBullet,
+                callbackScope: this,
+                repeat: -1
+            }
+        );
+        this.autoShootBulletsTimer.paused = true;
+        this.powerUpDurationTimer = this.time.addEvent(
+            {
+                delay: 10000,
+                callback: this.stopAutoShoot,
+                callbackScope: this,
+                repeat: -1
+            }
+        );
+        this.powerUpDurationTimer.paused = true;
+
 
         this.physics.add.overlap(
             this.bulletPool,
             this.enemyPool,
-            this.killEnemy,
+            this.hitEnemy,
             null,
             this
         )
+        this.physics.add.overlap(
+            this.enemyBulletPool,
+            this.spaceship,
+            this.hitPlayer,
+            null,
+            this
+        )
+        this.physics.add.overlap(
+            this.powerUpPool,
+            this.spaceship,
+            this.startAutoShoot,
+            null,
+            this
+        )
+
     }
 
     createBullet()
     {
         var _bullet = this.bulletPool.getFirst(false);
+        var _posX = this.spaceship.x;
+        var _posY = this.spaceship.y - 12;
+
         if (!_bullet){ // detects if the 1st bullet is out of screen
-            console.log('create bullet');
-            _bullet = new bulletPrefab(this, this.spaceship.x, this.spaceship.y - 12, 'bullet');
+            _bullet = new bulletPrefab(this, _posX, _posY, 'bullet');
             this.bulletPool.add(_bullet);
         }
         else {
-            console.log('reset bullet');
             _bullet.active = true;
-            _bullet.body.reset(this.spaceship.x, this.spaceship.y - 12);
+            _bullet.body.reset(_posX, _posY);
         }
 
         _bullet.body.setVelocityY(gamePrefs.SPEED_BULLET);
@@ -80,40 +116,110 @@ class gameState extends Phaser.Scene
     createEnemy()
     {
         var _enemy = this.enemyPool.getFirst(false);
-        var posX = Phaser.Math.Between(16, config.width - 16);
-        var posY = -16;
+        var _posX = Phaser.Math.Between(16, config.width - 16);
+        var _posY = -16;
 
         if (!_enemy)
         {
-            console.log('create enemy');
-            _enemy = new enemyPrefab(this, posX, posY, 'enemySpaceship');
-            this.enemyPool.add(_enemy)
+            _enemy = new enemyPrefab(this, _posX, _posY, 'enemySpaceship', 2);
+            this.enemyPool.add(_enemy);
         }
         else
         {
-            console.log('reset enemy');
             _enemy.active = true;
-            _enemy.body.reset(posX, posY, 'enemySpaceship');
+            _enemy.resetLives();
+            _enemy.resumeShooting();
+            _enemy.body.reset(_posX, _posY, 'enemySpaceship');
         }
 
         _enemy.body.setVelocityY(gamePrefs.SPEED_ENEMY);
-        //_enemy.anims.play('enemySpaceshipAnim');
     }
 
+    createEnemyBullet(_enemySpaceship)
+    {
+        var _enemyBullet = this.enemyBulletPool.getFirst(false);
+        var _posX = _enemySpaceship.x;
+        var _posY = _enemySpaceship.y;
 
-    killEnemy(_bullet, _enemy)
+        if (!_enemyBullet) {
+            _enemyBullet = new enemyBulletPrefab(this, _posX, _posY, 'enemyBullet');
+            this.enemyBulletPool.add(_enemyBullet);
+        }
+        else {
+            _enemyBullet.active = true;
+            _enemyBullet.body.reset(_posX, _posY);
+        }
+
+        _enemyBullet.body.setVelocityY(-gamePrefs.SPEED_BULLET);
+    }
+
+    createPowerUp(_posX, _posY)
+    {
+        var _powerUp = this.powerUpPool.getFirst(false);
+
+        if (!_powerUp) {
+            _powerUp = new powerUpPrefab(this, _posX, _posY, 'powerUp');
+            this.powerUpPool.add(_powerUp);
+        }
+        else {
+            _powerUp.active = true;
+            _powerUp.body.reset(_posX, _posY);
+        }
+
+        _powerUp.body.setVelocityY(gamePrefs.SPEED_POWERUP);
+    }
+
+    hitEnemy(_bullet, _enemy)
     {
         _bullet.setActive(false);
         _bullet.y = -100;
 
-        _enemy.setActive(false);
-        _enemy.y = -100;
+        var _wasAlive = !_enemy.isDead();
+        _enemy.takeDamage(1);
+        if (_enemy.isDead() && _wasAlive)
+        {
+            if (!Phaser.Math.Between(0, 2))
+            {
+                this.createPowerUp(_enemy.x, _enemy.y);
+            }     
+
+            _enemy.stopShooting();
+            _enemy.setActive(false);
+            _enemy.y = -100;
+        }        
     }
+
+    hitPlayer(_spaceship, _enemyBullet)
+    {
+        console.log('player hit');
+
+        _enemyBullet.setActive(false);
+        _enemyBullet.y = config.height + 100;
+    }
+
+    startAutoShoot(_spaceship, _powerUp)
+    {
+        this.autoShootBulletsTimer.paused = false;
+        this.powerUpDurationTimer.paused = false;
+
+        this.canShoot = false;
+    }
+
+    stopAutoShoot()
+    {
+        this.autoShootBulletsTimer.paused = true;
+        this.powerUpDurationTimer.paused = true;
+
+        this.canShoot = true;
+    }
+
 
     loadPools()
     {
         this.bulletPool = this.physics.add.group();
         this.enemyPool = this.physics.add.group();
+        this.enemyBulletPool = this.physics.add.group();
+        this.powerUpPool = this.physics.add.group();
     }
 
     loadAnimations()
@@ -143,7 +249,6 @@ class gameState extends Phaser.Scene
             }
         );
 
-
         this.anims.create(
             {
                 key:'enemySpaceshipAnim',
@@ -151,7 +256,16 @@ class gameState extends Phaser.Scene
                 frameRate:10,
                 repeat:-1
             }
-        )
+        );
+
+        this.anims.create(
+            {
+                key: 'powerUpAnim',
+                frames: this.anims.generateFrameNumbers('powerUp', {start:0, end:1}),
+                frameRate:10,
+                repeat:-1
+            }
+        );
     }
 
 
