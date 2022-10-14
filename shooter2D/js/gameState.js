@@ -185,7 +185,7 @@ class gameState extends Phaser.Scene
 
             _enemy.stopShooting();
             _enemy.setActive(false);
-            _enemy.y = -100;
+            _enemy.y = config.height + 100;
         }        
     }
 
@@ -203,6 +203,9 @@ class gameState extends Phaser.Scene
         this.powerUpDurationTimer.paused = false;
 
         this.canShoot = false;
+
+        _powerUp.setActive(false);
+        _powerUp.y = config.height + 100;
     }
 
     stopAutoShoot()
