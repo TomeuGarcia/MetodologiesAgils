@@ -30,7 +30,7 @@ class gameState extends Phaser.Scene
                                               'foreground').setOrigin(0);
         this.foreground.setMask(this.mask);
 
-        this.player = this.physics.add.sprite(10, 10, 'player').setScale(1);
+        this.player = this.physics.add.sprite(gamePrefs.HALF_PLAYER_SIDE, gamePrefs.HALF_PLAYER_SIDE, 'player').setScale(1);
         this.player.body.collideWorldBounds = true;
         this.addSquareToMask();
 
@@ -45,51 +45,63 @@ class gameState extends Phaser.Scene
                 this.grid[row][col] = 0;
             }
         }
+
+
+        this.moveX = 0;
+        this.moveY = 0;
+        this.lastMoveX = 0;
+        this.lastMoveY = 0;
+
     }
 
     update()
     {
-        if (this.cursorKeys.right.isDown && this.canMoveHorizontaly(this.player.y))
-        {
-            this.player.x += gamePrefs.PLAYER_MOVE_SPEED;
-            this.addSquareToMask();
-        }
-        else if (this.cursorKeys.left.isDown && this.canMoveHorizontaly(this.player.y))
-        {
-            this.player.x -= gamePrefs.PLAYER_MOVE_SPEED;
-            this.addSquareToMask();
-        }
-        else if (this.cursorKeys.up.isDown && this.canMoveVertically(this.player.x))
-        {
-            this.player.y -= gamePrefs.PLAYER_MOVE_SPEED;
-            this.addSquareToMask();
-        }
-        else if (this.cursorKeys.down.isDown && this.canMoveVertically(this.player.x))
-        {
-            this.player.y += gamePrefs.PLAYER_MOVE_SPEED;
-            this.addSquareToMask();
-        }
+        this.getInputs();
 
-        this.pixel2cell(0,0);
+        if (this.canMoveHorizontaly())
+        {
+            this.player.x += this.moveX;
+            this.addSquareToMask();
+        }
+        if (this.canMoveVertically())
+        {
+            this.player.y += this.moveY;
+            this.addSquareToMask();
+        }
     }
 
+
+    getInputs()
+    {
+        this.moveX = 0;
+        this.moveY = 0;
+
+        if (this.cursorKeys.right.isDown) this.moveX += gamePrefs.PLAYER_MOVE_SPEED;
+        if (this.cursorKeys.left.isDown) this.moveX -= gamePrefs.PLAYER_MOVE_SPEED;
+
+        if (this.cursorKeys.up.isDown) this.moveY -= gamePrefs.PLAYER_MOVE_SPEED;
+        if (this.cursorKeys.down.isDown) this.moveY += gamePrefs.PLAYER_MOVE_SPEED;
+    }
 
     addSquareToMask()
     {
         shapeMask.fillRect(this.player.x - gamePrefs.HALF_PLAYER_SIDE, this.player.y - gamePrefs.HALF_PLAYER_SIDE, gamePrefs.MASK_SIDE, gamePrefs.MASK_SIDE);
     }
 
-    canMoveHorizontaly(pixelY)
+    canMoveHorizontaly()
     {
-        var y = pixelY % gamePrefs.CELL_SIZE;
-        console.log(y);
-        return y > 5 && y < 11;
+        return this.canMove(this.player.y);
     }
 
-    canMoveVertically(pixelX)
+    canMoveVertically()
     {
-        var x = pixelX % gamePrefs.CELL_SIZE;
-        return x > 5 && x < 11;
+        return this.canMove(this.player.x);
+    }
+
+    canMove(pixel)
+    {
+        var p = pixel % gamePrefs.CELL_SIZE;
+        return p > ((gamePrefs.CELL_SIZE / 2) -2) && p < ((gamePrefs.CELL_SIZE / 2) +2);
     }
 
     pixel2cell(pixelX, pixelY)
