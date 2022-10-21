@@ -13,13 +13,13 @@ class gameState extends Phaser.Scene
     preload()
     {
         this.load.setPath('assets/images/');
-        this.load.image('backgroundBack', 'background_back.png');
-        this.load.image('backgroundFrontal', 'background_frontal.png');
-        this.load.spritesheet('spaceship', 'naveAnim.png', {frameWidth:16, frameHeight: 24});
+        //this.load.image('backgroundBack', 'background_back.png');
+        //this.load.image('backgroundFrontal', 'background_frontal.png');
+        //this.load.spritesheet('spaceship', 'naveAnim.png', {frameWidth:16, frameHeight: 24});
         this.load.image('bullet', 'spr_bullet_0.png');
         this.load.spritesheet('enemySpaceship', 'enemy-medium.png', {frameWidth:32, frameHeight:16});
         this.load.image('enemyBullet', 'spr_enemy_bullet_0.png');
-        this.load.spritesheet('powerUp', 'spr_power_up.png', {frameWidth:16, frameHeight:16});
+        this.load.spritesheet('powerUpAutoshoot', 'spr_power_up.png', {frameWidth:16, frameHeight:16});
     }
 
     create()
@@ -36,12 +36,15 @@ class gameState extends Phaser.Scene
         this.canShoot = true;
 
         this.cursorKeys = this.input.keyboard.createCursorKeys();
-        this.cursorKeys.space.on('up', function(event)
+        this.cursorKeys.space.on(
+            'up', 
+            function()
             {
                 if (this.canShoot)
                     this.createBullet();
-            }, this
-        )
+            }, 
+            this
+        );
 
         this.enemySpawnTimer = this.time.addEvent(
             {
@@ -50,7 +53,7 @@ class gameState extends Phaser.Scene
                 callbackScope: this,
                 repeat: -1
             }
-        )
+        );
         this.autoShootBulletsTimer = this.time.addEvent(
             {
                 delay: 200,
@@ -77,21 +80,21 @@ class gameState extends Phaser.Scene
             this.hitEnemy,
             null,
             this
-        )
+        );
         this.physics.add.overlap(
             this.enemyBulletPool,
             this.spaceship,
             this.hitPlayer,
             null,
             this
-        )
+        );
         this.physics.add.overlap(
             this.powerUpPool,
             this.spaceship,
-            this.startAutoShoot,
+            this.pickPowerUp,
             null,
             this
-        )
+        );
 
     }
 
@@ -153,12 +156,12 @@ class gameState extends Phaser.Scene
         _enemyBullet.body.setVelocityY(-gamePrefs.SPEED_BULLET);
     }
 
-    createPowerUp(_posX, _posY)
+    createPowerUp(_posX, _posY, _tag)
     {
         var _powerUp = this.powerUpPool.getFirst(false);
 
         if (!_powerUp) {
-            _powerUp = new powerUpPrefab(this, _posX, _posY, 'powerUp');
+            _powerUp = new powerUpPrefab(this, _posX, _posY, _tag);
             this.powerUpPool.add(_powerUp);
         }
         else {
@@ -174,13 +177,20 @@ class gameState extends Phaser.Scene
         _bullet.setActive(false);
         _bullet.y = -100;
 
-        var _wasAlive = !_enemy.isDead();
         _enemy.takeDamage(1);
-        if (_enemy.isDead() && _wasAlive)
+        if (_enemy.isDead())
         {
-            if (!Phaser.Math.Between(0, 2))
+            if (!Phaser.Math.Between(0, 3)) // 1/4 chances
             {
-                this.createPowerUp(_enemy.x, _enemy.y);
+                var type = Phaser.Math.Between(0,0);
+                switch (type){
+                    case 0:
+                        this.createPowerUp(_enemy.x, _enemy.y, 'Autoshoot');
+                        break;
+                    default:
+                        break;
+                }
+                
             }     
 
             _enemy.stopShooting();
@@ -195,6 +205,14 @@ class gameState extends Phaser.Scene
 
         _enemyBullet.setActive(false);
         _enemyBullet.y = config.height + 100;
+    }
+
+    pickPowerUp(_spaceship, _powerUp)
+    {
+        if (_powerUp.type == 'Autoshoot')
+        {
+            this.startAutoShoot(_spaceship, _powerUp);
+        }
     }
 
     startAutoShoot(_spaceship, _powerUp)
@@ -227,6 +245,7 @@ class gameState extends Phaser.Scene
 
     loadAnimations()
     {
+        /*
         this.anims.create(
             {
                 key:'idle',
@@ -235,6 +254,7 @@ class gameState extends Phaser.Scene
                 repeat:-1
             }
         );
+        */
         this.anims.create(
             {
                 key:'left',
@@ -264,7 +284,7 @@ class gameState extends Phaser.Scene
         this.anims.create(
             {
                 key: 'powerUpAnim',
-                frames: this.anims.generateFrameNumbers('powerUp', {start:0, end:1}),
+                frames: this.anims.generateFrameNumbers('powerUpAutoshoot', {start:0, end:1}),
                 frameRate:10,
                 repeat:-1
             }

@@ -108,7 +108,6 @@ class gameState extends Phaser.Scene
     {
         //(gamePrefs.NUM_CELL_LEFT_OFFSET * gamePrefs.CELL_SIZE) + 
         var x = (pixelX / gamePrefs.CELL_SIZE) % gamePrefs.CELL_SIZE;
-        x > 2 || x < 6
     }
 
 }

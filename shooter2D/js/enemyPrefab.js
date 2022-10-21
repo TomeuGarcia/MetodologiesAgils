@@ -21,7 +21,7 @@ class enemyPrefab extends Phaser.GameObjects.Sprite
                 callbackScope: _scene,
                 repeat: -1
             }          
-        )
+        );
     }
 
     preUpdate(time, delta)
