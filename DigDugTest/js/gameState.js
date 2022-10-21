@@ -60,9 +60,9 @@ class gameState extends Phaser.Scene
         this.getInputs();
         this.movePlayer();
 
-        var v = this.pix2cell(60,60);
-        console.log(v.x);
-        console.log(v.y);
+        //var v = this.pix2cell(60,60);
+        //console.log(v.x);
+        //console.log(v.y);
     }
 
 
