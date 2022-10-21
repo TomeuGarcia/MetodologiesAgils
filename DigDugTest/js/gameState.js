@@ -30,7 +30,7 @@ class gameState extends Phaser.Scene
                                               'foreground').setOrigin(0);
         this.foreground.setMask(this.mask);
 
-        this.player = this.physics.add.sprite(gamePrefs.HALF_PLAYER_SIDE, gamePrefs.HALF_PLAYER_SIDE, 'player').setScale(1);
+        this.player = this.physics.add.sprite(gamePrefs.HALF_CELL_SIZE, gamePrefs.HALF_CELL_SIZE, 'player').setScale(1).setOrigin(.5);
         this.player.body.collideWorldBounds = true;
         this.addSquareToMask();
 
@@ -42,7 +42,7 @@ class gameState extends Phaser.Scene
             this.grid[row] = new Array(gamePrefs.NUM_CELL_WIDTH);
             for (var col = 0; col < gamePrefs.NUM_CELL_WIDTH; ++col)
             {
-                this.grid[row][col] = 0;
+                this.grid[row][col] = 1;
             }
         }
 
@@ -54,25 +54,23 @@ class gameState extends Phaser.Scene
 
     }
 
+
     update()
     {
         this.getInputs();
+        this.movePlayer();
 
-        if (this.canMoveHorizontaly())
-        {
-            this.player.x += this.moveX;
-            this.addSquareToMask();
-        }
-        if (this.canMoveVertically())
-        {
-            this.player.y += this.moveY;
-            this.addSquareToMask();
-        }
+        var v = this.pix2cell(60,60);
+        console.log(v.x);
+        console.log(v.y);
     }
 
 
     getInputs()
     {
+        if (this.moveX != 0) this.lastMoveX = this.moveX;
+        if (this.moveY != 0) this.lastMoveY = this.moveY;
+
         this.moveX = 0;
         this.moveY = 0;
 
@@ -83,9 +81,41 @@ class gameState extends Phaser.Scene
         if (this.cursorKeys.down.isDown) this.moveY += gamePrefs.PLAYER_MOVE_SPEED;
     }
 
+    movePlayer()
+    {
+        if (this.canMoveHorizontaly())
+        {
+            if (this.moveX == 0 && this.moveY != 0 && !this.canMoveVertically())
+            {
+                this.player.x += this.lastMoveX;
+            }
+            else
+            {
+                // Move normal
+                this.player.x += this.moveX;
+            }
+            this.addSquareToMask();
+        }
+
+        if (this.canMoveVertically())
+        {
+            if (this.moveY == 0 && this.moveX != 0 && !this.canMoveHorizontaly())
+            {
+                this.player.y += this.lastMoveY;
+            }
+            else
+            {
+                // Move normal
+                this.player.y += this.moveY;
+            }
+            this.addSquareToMask();
+        }
+        
+    }
+
     addSquareToMask()
     {
-        shapeMask.fillRect(this.player.x - gamePrefs.HALF_PLAYER_SIDE, this.player.y - gamePrefs.HALF_PLAYER_SIDE, gamePrefs.MASK_SIDE, gamePrefs.MASK_SIDE);
+        shapeMask.fillRect(this.player.x - gamePrefs.HALF_CELL_SIZE, this.player.y - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE, gamePrefs.CELL_SIZE);
     }
 
     canMoveHorizontaly()
@@ -100,14 +130,12 @@ class gameState extends Phaser.Scene
 
     canMove(pixel)
     {
-        var p = pixel % gamePrefs.CELL_SIZE;
-        return p > ((gamePrefs.CELL_SIZE / 2) -2) && p < ((gamePrefs.CELL_SIZE / 2) +2);
+        return (pixel % gamePrefs.CELL_SIZE) == (gamePrefs.CELL_SIZE / 2);
     }
 
-    pixel2cell(pixelX, pixelY)
+    pix2cell(pixelX, pixelY)
     {
-        //(gamePrefs.NUM_CELL_LEFT_OFFSET * gamePrefs.CELL_SIZE) + 
-        var x = (pixelX / gamePrefs.CELL_SIZE) % gamePrefs.CELL_SIZE;
+        return new Phaser.Math.Vector2(pixelX/gamePrefs.CELL_SIZE, pixelY/gamePrefs.CELL_SIZE);
     }
 
 }

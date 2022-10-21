@@ -3,10 +3,9 @@
 
 var gamePrefs =
 {
-    PLAYER_MOVE_SPEED: 0.8,
-    HALF_PLAYER_SIDE: 7,
-    MASK_SIDE: 14,
+    PLAYER_MOVE_SPEED: 1, // can only be: 0.5, 1, 2, 4...
     CELL_SIZE: 16,
+    HALF_CELL_SIZE: 8,
     NUM_CELL_WIDTH: 12,
     NUM_CELL_HEIGHT: 12,
     NUM_CELL_LEFT_OFFSET: 1,
