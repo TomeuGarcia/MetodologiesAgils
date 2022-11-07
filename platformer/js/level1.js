@@ -8,13 +8,13 @@ class level1 extends Phaser.Scene{
         this.load.setPath('assets/tilesets/');
         this.load.image('walls','tileset_walls.png');
         this.load.image('moss','tileset_moss.png');
-        /*this.load.spritesheet('enemy','enemy-medium.png',
-        {frameWidth:32,frameHeight:16});        */
-
+        
         this.load.setPath('assets/sprites/');
         this.load.image('bg_green','bg_green_tile.png');
         this.load.image('door','spr_door_open_0.png');
-        this.load.image('hero','spr_yellow_idle_0.png');
+        
+        this.load.spritesheet('hero', 'hero.png', {frameWidth: 32, frameHeight: 32});
+
 
         this.load.setPath('assets/maps/');
         this.load.tilemapTiledJSON('level1','level1.json');
@@ -47,8 +47,12 @@ class level1 extends Phaser.Scene{
         this.door.body.allowGravity = false;
         this.door.body.setImmovable(true);
 
+
+        this.cursors = this.input.keyboard.createCursorKeys();
+
         // Render hero
-        this.hero = this.physics.add.sprite(65,100,'hero');
+        this.hero = new heroPrefab(this, 65, 100, 'hero', this.cursors);
+        
 
         /*
         this.physics.add.collider
@@ -64,10 +68,12 @@ class level1 extends Phaser.Scene{
             this.hero
         );
 
-       this.loadAnimations();
+        this.loadAnimations();
        
-       this.cursores = this.input.keyboard.createCursorKeys();
        
+        this.cameras.main.startFollow(this.hero);
+        this.cameras.main.setBounds(0, 0, gamePrefs.LEVEL1_WIDTH, gamePrefs.LEVEL1_HEIGHT);
+
         /* 
         this.cursores.space.on
         (
@@ -97,28 +103,24 @@ class level1 extends Phaser.Scene{
 
     loadAnimations()
     {
-        
-        /*
-        this.anims.create
-        ({
-            key:'idle',
-            frames:this.anims.generateFrameNumbers('nave',{start:0,end:1}),
-            frameRate:10,
-            repeat:-1
-        });
-        */
-        
+        this.anims.create(
+            {
+                key: 'heroRun',
+                frmaes: this.anims.generateFrameNumbers('hero', {start:2, end:5}),
+                frameRate: 10,
+                repeat: -1
+            }
+        );
+
     }
 
 	update()
     {
-        /*
-        this.bg1.tilePositionY -=.25;
-        this.bg2.tilePositionY -=1;
 
+        /*
         if(this.cursores.left.isDown){            			
             this.nave.anims.play('left',true);
-            //this.nave.x -=gamePrefs.SPEED_NAVE;
+            this.hero.body.velocity
 			this.nave.body.velocity.x -=gamePrefs.SPEED_NAVE;
 		} else if(this.cursores.right.isDown){            
 			this.nave.anims.play('right',true);           
@@ -130,4 +132,5 @@ class level1 extends Phaser.Scene{
 		}
         */
     }
+
 }

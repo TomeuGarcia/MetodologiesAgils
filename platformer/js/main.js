@@ -22,8 +22,10 @@ var config =
     },
     scale:
     {
-        mode:Phaser.Scale.FIT,
-        autoCenter:Phaser.Scale.CENTER_BOTH
+        mode: Phaser.Scale.FIT,
+        width: gamePrefs.GAME_WIDTH / 2,
+        height: gamePrefs.GAME_HEIGHT / 2,
+        autoCenter: Phaser.Scale.CENTER_BOTH
     },
     physics:
     {
