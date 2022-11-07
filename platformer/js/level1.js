@@ -15,6 +15,8 @@ class level1 extends Phaser.Scene{
         
         this.load.spritesheet('hero', 'hero.png', {frameWidth: 32, frameHeight: 32});
 
+        this.load.spritesheet('enemyJumper', 'jumper.png', {frameWidth:32, frameHeight:32});
+
 
         this.load.setPath('assets/maps/');
         this.load.tilemapTiledJSON('level1','level1.json');
@@ -70,7 +72,14 @@ class level1 extends Phaser.Scene{
 
         this.loadAnimations();
        
-       
+        this.jumper = new jumperPrefab(this, 240, 304, 'enemyJumper');
+        this.physics.add.collider
+        (
+            this.walls,
+            this.jumper
+        );
+
+
         this.cameras.main.startFollow(this.hero);
         this.cameras.main.setBounds(0, 0, gamePrefs.LEVEL1_WIDTH, gamePrefs.LEVEL1_HEIGHT);
 
@@ -107,6 +116,15 @@ class level1 extends Phaser.Scene{
             {
                 key: 'heroRun',
                 frmaes: this.anims.generateFrameNumbers('hero', {start:2, end:5}),
+                frameRate: 10,
+                repeat: -1
+            }
+        );
+
+        this.anims.create(
+            {
+                key: 'jumperIdle',
+                frmaes: this.anims.generateFrameNumbers('jumperEnemy', {start:0, end:3}),
                 frameRate: 10,
                 repeat: -1
             }
