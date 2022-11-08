@@ -1,8 +1,9 @@
 
 
-class jumperPrefab extends enemyInterface
+class slimePrefab extends enemyInterface
 {
-    constructor(_scene, _positionX, _positionY, _spriteTag = 'jumper')
+
+    constructor(_scene, _positionX, _positionY, _spriteTag = 'slime')
     {
         super(_scene, _positionX, _positionY, _spriteTag);
     }
@@ -11,9 +12,9 @@ class jumperPrefab extends enemyInterface
     {
         super.preUpdate(time, delta);
 
-        this.anims.play('jumperWalk', true); 
-
-        if (this.body.blocked.right || this.body.blocked.left)
+        this.anims.play('slimeWalk', true); 
+        
+        if ((this.body.blocked.right || this.body.blocked.left) || !this.body.blocked.down)
         {
             this.moveDirection *= -1;
             this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.moveDirection);
@@ -21,6 +22,5 @@ class jumperPrefab extends enemyInterface
         }
 
     }
-
 
 }
