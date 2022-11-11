@@ -13,13 +13,16 @@ class level1 extends Phaser.Scene
         
         this.load.setPath('assets/sprites/');
         this.load.image('bg_green', 'bg_green_tile.png');
-        this.load.image('door', 'spr_door_closed_0.png');
+        this.load.image('door', 'spr_door_open_0.png');
         this.load.spritesheet('hero', 'hero.png', {frameWidth: 32, frameHeight: 32});
         this.load.spritesheet('jumper', 'jumper.png', {frameWidth: 32, frameHeight: 32});
         this.load.spritesheet('slime', 'slime.png', {frameWidth: 32, frameHeight: 32});
 
+        this.load.spritesheet('healthUI', 'health.png', {frameWidth:128, frameHeight:28});
+
         this.load.setPath('assets/maps/');
         this.load.tilemapTiledJSON('level1', 'level1.json');
+        this.load.json('level1JSON', 'level1.json');
     }
 
 	create()
@@ -51,7 +54,7 @@ class level1 extends Phaser.Scene
 
         this.cursors = this.input.keyboard.createCursorKeys();
         // Draw hero
-        this.hero = new heroPrefab(this, 65, 100, 'hero', this.cursors);
+        this.hero = new heroPrefab(this, 65, 100, 'hero', this.cursors, 6);
 
         this.physics.add.collider
         (
@@ -60,6 +63,8 @@ class level1 extends Phaser.Scene
         );
 
         // Draw enemies
+        this.loadEnemies();
+        /*
         this.jumper = new jumperPrefab(this, 240, 304, 'jumper');
         this.physics.add.collider
         (
@@ -67,14 +72,20 @@ class level1 extends Phaser.Scene
             this.walls
         );
 
-        this.slime = new slimePrefab(this, 440, 200, 'slime');
+        this.slime = new slimePrefab(this, 672, 268, 'slime', 400, 992);
         this.physics.add.collider
         (
             this.slime,
             this.walls
         );
+        */
 
         this.loadAnimations();
+
+        this.healthUI = this.add.sprite(5, 5, 'healthUI', this.hero.health).setOrigin(0);
+        this.healthUI.setScrollFactor(0, 0);
+
+
         
         this.cameras.main.startFollow(this.hero);
         this.cameras.main.setBounds(0, 0, gamePrefs.LEVEL1_WIDTH, gamePrefs.LEVEL1_HEIGHT);
@@ -106,6 +117,44 @@ class level1 extends Phaser.Scene
             frameRate: 10,
             repeat: -1
         })
+   
+    }
+
+    loadEnemies()
+    {
+        const enemiesLayer = this.cache.json.get('level1JSON').layers[6];
+        const enemyDataHeight = enemiesLayer.height;
+        const enemyDataWidth = enemiesLayer.width;
+        const enemyData = enemiesLayer.data;
+        const pix = 32;
+
+        this.enemies = this.physics.add.group();
+
+        for (var i = 0; i < enemyDataHeight; ++i)
+        {
+            for (var j = 0; j < enemyDataWidth; ++j)
+            {   
+                const it = (i*enemyDataHeight)+j;
+                const enemyId = enemyData[it];
+
+                if (enemyId == 45)
+                {
+                    this.enemies.add(new jumperPrefab(this, j*pix, i*pix, 'jumper'));
+                    console.log("Created JUMPER at: ", j*pix, i*pix);
+                }
+                else if (enemyId == 46)
+                {
+                    this.enemies.add(new slimePrefab(this, j*pix, i*pix, 'slime', 400, 992));
+                    console.log("Created SLIME at: ", j*pix, i*pix);
+                }
+            }
+        }
+
+        this.physics.add.collider
+        (
+            this.enemies,
+            this.walls
+        );
     }
 
 	update()

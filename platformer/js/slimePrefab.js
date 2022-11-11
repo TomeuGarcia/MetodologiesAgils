@@ -3,9 +3,12 @@
 class slimePrefab extends enemyInterface
 {
 
-    constructor(_scene, _positionX, _positionY, _spriteTag = 'slime')
+    constructor(_scene, _positionX, _positionY, _spriteTag = 'slime', _minPatrolX, _maxPatrolX)
     {
-        super(_scene, _positionX, _positionY, _spriteTag);
+        super(_scene, _positionX, _positionY, _spriteTag, 1);
+
+        this.minPatrolX = _minPatrolX;
+        this.maxPatrolX = _maxPatrolX;
     }
 
     preUpdate(time,delta)
@@ -14,13 +17,16 @@ class slimePrefab extends enemyInterface
 
         this.anims.play('slimeWalk', true); 
         
-        if ((this.body.blocked.right || this.body.blocked.left) || !this.body.blocked.down)
+        if (this.isBlockedByWalls() || this.isOutOfPatrolPosition())
         {
-            this.moveDirection *= -1;
-            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.moveDirection);
-            this.flipX = !this.flipX;
+            this.flipMoveDirectionX();
         }
 
+    }
+
+    isOutOfPatrolPosition()
+    {
+        return this.body.position.x < this.minPatrolX || this.body.position.x > this.maxPatrolX;
     }
 
 }

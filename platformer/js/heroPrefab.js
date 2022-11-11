@@ -2,12 +2,15 @@
 
 class heroPrefab extends Phaser.GameObjects.Sprite
 {
-    constructor(_scene, _positionX, _positionY, _spriteTag = 'hero', _cursors)
+    constructor(_scene, _positionX, _positionY, _spriteTag = 'hero', _cursors, _maxHealth)
     {
         super(_scene, _positionX, _positionY, _spriteTag);
         this.cursors = _cursors;
         _scene.add.existing(this);
         _scene.physics.world.enable(this); //Or alternatively: _scene.physics.add.existing(this);
+
+        this.maxHealth = _maxHealth;
+        this.health = _maxHealth;
     }
 
 
@@ -47,6 +50,18 @@ class heroPrefab extends Phaser.GameObjects.Sprite
         }
         
 
+    }
+
+
+    takeDamage(_damageAmount)
+    {
+        this.health -= _damageAmount;
+        if (this.health < 0) this.health = 0;
+
+        this.scene.healthUI.setFrame(this.health);
+
+        this.body.reset(65, 100);
+        this.scene.cameras.main.shake(100, 0.05).flash(500, 100, 0, 0);
     }
 
 }

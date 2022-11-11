@@ -4,7 +4,7 @@ class jumperPrefab extends enemyInterface
 {
     constructor(_scene, _positionX, _positionY, _spriteTag = 'jumper')
     {
-        super(_scene, _positionX, _positionY, _spriteTag);
+        super(_scene, _positionX, _positionY, _spriteTag, 2);
     }
 
     preUpdate(time,delta)
@@ -13,14 +13,14 @@ class jumperPrefab extends enemyInterface
 
         this.anims.play('jumperWalk', true); 
 
-        if (this.body.blocked.right || this.body.blocked.left)
+        if (this.isBlockedByWalls())
         {
-            this.moveDirection *= -1;
-            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.moveDirection);
-            this.flipX = !this.flipX;
+            this.flipMoveDirectionX();
         }
 
     }
+
+
 
 
 }
