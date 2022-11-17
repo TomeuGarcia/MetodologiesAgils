@@ -35,6 +35,7 @@ class enemyInterface extends Phaser.GameObjects.Sprite
     {
         if (_enemy.body.touching.up && _hero.body.touching.down)
         {
+            this.scene.hitEnemy.play();
             this.destroy();
             _hero.jump();
         }

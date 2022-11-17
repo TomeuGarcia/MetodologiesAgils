@@ -67,6 +67,7 @@ class heroPrefab extends Phaser.GameObjects.Sprite
     jump()
     {
         this.body.setVelocityY(-gamePrefs.HERO_JUMP);
+        this.scene.jump.play();
     }
 
 }

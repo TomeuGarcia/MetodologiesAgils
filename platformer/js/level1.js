@@ -17,12 +17,27 @@ class level1 extends Phaser.Scene
         this.load.spritesheet('hero', 'hero.png', {frameWidth: 32, frameHeight: 32});
         this.load.spritesheet('jumper', 'jumper.png', {frameWidth: 32, frameHeight: 32});
         this.load.spritesheet('slime', 'slime.png', {frameWidth: 32, frameHeight: 32});
+        this.load.spritesheet('gem', 'gem.png', {frameWidth: 32, frameHeight: 32});
 
         this.load.spritesheet('healthUI', 'health.png', {frameWidth:128, frameHeight:28});
+        this.load.image('gemUI', 'spr_gem_3.png');
 
+
+        // ---- JSON ----
         this.load.setPath('assets/maps/');
         this.load.tilemapTiledJSON('level1', 'level1.json');
         this.load.json('level1JSON', 'level1.json');
+
+
+        // ---- AUDIO ----
+        this.load.setPath('assets/sounds/');
+        this.load.audio('hitEnemy', 'smb_kick.wav');
+        this.load.audio('jump', 'smb_jump-super.wav');
+        this.load.audio('coin', 'smb_coin.wav');
+
+        // ---- FONTS ----
+        this.load.setPath('assets/fonts/');
+        this.load.bitmapFont('gameFont', 'GameFont.png', 'GameFont.xml');
     }
 
 	create()
@@ -56,6 +71,7 @@ class level1 extends Phaser.Scene
         // Draw hero
         this.hero = new heroPrefab(this, 65, 100, 'hero', this.cursors, 6);
 
+
         this.physics.add.collider
         (
             this.hero,
@@ -81,14 +97,22 @@ class level1 extends Phaser.Scene
         */
 
         this.loadAnimations();
+        this.loadSounds();
+        new gemPrefab(this, 100, 200, 'gem');
+
 
         this.healthUI = this.add.sprite(5, 5, 'healthUI', this.hero.health).setOrigin(0);
         this.healthUI.setScrollFactor(0, 0);
 
+        this.gemUI = this.add.sprite(gamePrefs.GAME_WIDTH/2 - 40, -5, 'gemUI', 0).setOrigin(1,0).setScale(1.5);
+        this.gemUI.setScrollFactor(0, 0);
+        this.gemUIText = this.add.bitmapText(gamePrefs.GAME_WIDTH/2-50, 15, 'gameFont', 'x0', 15);
+        this.gemUIText.setScrollFactor(0, 0);
+        this.collectedGems = 0;
 
-        
         this.cameras.main.startFollow(this.hero);
         this.cameras.main.setBounds(0, 0, gamePrefs.LEVEL1_WIDTH, gamePrefs.LEVEL1_HEIGHT);
+        
     }
 
 
@@ -117,6 +141,14 @@ class level1 extends Phaser.Scene
             frameRate: 10,
             repeat: -1
         })
+        
+        this.anims.create
+        ({
+            key: 'gemRotate',
+            frames: this.anims.generateFrameNumbers('gem', {start: 0, end: 4}),
+            frameRate: 10,
+            repeat: -1
+        })
    
     }
 
@@ -125,8 +157,9 @@ class level1 extends Phaser.Scene
         const enemiesLayer = this.cache.json.get('level1JSON').layers[6];
         const pix = 32;
 
-        this.enemies = this.physics.add.group();
+        this.enemies = this.add.group();
 
+        /*
         for (var i = 0; i < enemiesLayer.height; ++i)
         {
             for (var j = 0; j < enemiesLayer.width; ++j)
@@ -149,6 +182,25 @@ class level1 extends Phaser.Scene
                 }
             }
         }
+        */
+    
+        const objectsLayer = this.cache.json.get('level1JSON').layers[1].objects;
+        for (var i = 0; i < objectsLayer.length; ++i)
+        {
+            const pixX = objectsLayer[i].x;
+            const pixY = objectsLayer[i].y;
+
+            switch(objectsLayer[i].type)
+            {
+                case "jumper":
+                    this.enemies.add(new jumperPrefab(this, pixX, pixY, 'jumper'));
+                    break;
+                case "slime":
+                    this.enemies.add(new slimePrefab(this, pixX, pixY, 'slime', 0, objectsLayer[i].properties[0].value));
+                    break;
+            }
+        }
+        
 
         this.physics.add.collider
         (
@@ -157,9 +209,29 @@ class level1 extends Phaser.Scene
         );
     }
 
+    loadSounds()
+    {
+        this.getGem = this.sound.add('coin');
+        this.hitEnemy = this.sound.add('hitEnemy');
+        this.jump = this.sound.add('jump');
+        //this.jump.on('complete', () => {this.getCoin.play(); console.log("YEP");});
+    }
+
 	update()
     {
         this.hero.update();
+    }
+
+
+    addGems(_amount)
+    {
+        this.collectedGems += _amount;
+        this.updateGemUICounter();
+    }
+
+    updateGemUICounter()
+    {
+        this.gemUIText.text = 'x' + this.collectedGems;
     }
 
 }
