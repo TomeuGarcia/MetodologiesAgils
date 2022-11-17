@@ -40,7 +40,7 @@ class heroPrefab extends Phaser.GameObjects.Sprite
             this.body.blocked.down &&
             Phaser.Input.Keyboard.DownDuration(this.cursors.up, 250))
         {
-            this.body.setVelocityY(-gamePrefs.HERO_JUMP);
+            this.jump();
         }
 
         //if (this.body.blocked.down)
@@ -62,6 +62,11 @@ class heroPrefab extends Phaser.GameObjects.Sprite
 
         this.body.reset(65, 100);
         this.scene.cameras.main.shake(100, 0.05).flash(500, 100, 0, 0);
+    }
+
+    jump()
+    {
+        this.body.setVelocityY(-gamePrefs.HERO_JUMP);
     }
 
 }

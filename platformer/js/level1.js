@@ -123,29 +123,29 @@ class level1 extends Phaser.Scene
     loadEnemies()
     {
         const enemiesLayer = this.cache.json.get('level1JSON').layers[6];
-        const enemyDataHeight = enemiesLayer.height;
-        const enemyDataWidth = enemiesLayer.width;
-        const enemyData = enemiesLayer.data;
         const pix = 32;
 
         this.enemies = this.physics.add.group();
 
-        for (var i = 0; i < enemyDataHeight; ++i)
+        for (var i = 0; i < enemiesLayer.height; ++i)
         {
-            for (var j = 0; j < enemyDataWidth; ++j)
+            for (var j = 0; j < enemiesLayer.width; ++j)
             {   
-                const it = (i*enemyDataHeight)+j;
-                const enemyId = enemyData[it];
+                const it = (i*enemiesLayer.width)+j;
+                const enemyId = enemiesLayer.data[it];
+
+                const pixX = j*pix;
+                const pixY = i*pix;
 
                 if (enemyId == 45)
                 {
-                    this.enemies.add(new jumperPrefab(this, j*pix, i*pix, 'jumper'));
-                    console.log("Created JUMPER at: ", j*pix, i*pix);
+                    this.enemies.add(new jumperPrefab(this, pixX, pixY, 'jumper'));
+                    //console.log("Created JUMPER at: ", pixX, pixY);
                 }
                 else if (enemyId == 46)
                 {
-                    this.enemies.add(new slimePrefab(this, j*pix, i*pix, 'slime', 400, 992));
-                    console.log("Created SLIME at: ", j*pix, i*pix);
+                    this.enemies.add(new slimePrefab(this, pixX, pixY, 'slime', 400, 992));
+                    //console.log("Created SLIME at: ", pixX, pixY);
                 }
             }
         }
