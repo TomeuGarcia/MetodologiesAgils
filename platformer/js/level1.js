@@ -99,6 +99,9 @@ class level1 extends Phaser.Scene
         this.loadAnimations();
         this.loadSounds();
         new gemPrefab(this, 100, 200, 'gem');
+        new gemPrefab(this, 150, 200, 'gem');
+        new gemPrefab(this, 200, 200, 'gem');
+        new gemPrefab(this, 250, 200, 'gem');
 
 
         this.healthUI = this.add.sprite(5, 5, 'healthUI', this.hero.health).setOrigin(0);
@@ -227,11 +230,19 @@ class level1 extends Phaser.Scene
     {
         this.collectedGems += _amount;
         this.updateGemUICounter();
+
+        localStorage.setItem('gems', this.collectedGems);
     }
 
     updateGemUICounter()
     {
         this.gemUIText.text = 'x' + this.collectedGems;
     }
+
+    doGameOver()
+    {
+        this.scene.start('gameOver');
+    }
+
 
 }

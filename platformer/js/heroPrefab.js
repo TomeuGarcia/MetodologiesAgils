@@ -9,8 +9,11 @@ class heroPrefab extends Phaser.GameObjects.Sprite
         _scene.add.existing(this);
         _scene.physics.world.enable(this); //Or alternatively: _scene.physics.add.existing(this);
 
+        this.body.setSize(12, 30);
+
         this.maxHealth = _maxHealth;
         this.health = _maxHealth;
+        this.scene = _scene;
     }
 
 
@@ -62,6 +65,11 @@ class heroPrefab extends Phaser.GameObjects.Sprite
 
         this.body.reset(65, 100);
         this.scene.cameras.main.shake(100, 0.05).flash(500, 100, 0, 0);
+
+        if (this.health == 0)
+        {
+            this.scene.doGameOver();
+        }
     }
 
     jump()

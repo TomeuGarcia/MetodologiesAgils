@@ -15,7 +15,7 @@ var config =
     type: Phaser.AUTO,
     width: gamePrefs.GAME_WIDTH,
     height: gamePrefs.GAME_HEIGHT,
-    scene:[level1],
+    scene:[level1, gameOver],
     render:
     {
         pixelArt:true
@@ -33,7 +33,7 @@ var config =
         arcade:
         {
             gravity:{y:gamePrefs.GRAVITY},
-            debug:false
+            debug:true
         }
     }
 }
