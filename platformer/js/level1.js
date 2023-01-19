@@ -61,7 +61,7 @@ class level1 extends Phaser.Scene
         //this.map.setCollisionBetween(1,11,true,true,'layer_walls');
         this.map.setCollisionBetween(1, 11, true, true, 'layer_walls');
 
-        // Draw door
+        // Draw doorthis.phy
         this.door = this.physics.add.sprite(65, 268, 'door');
         this.door.body.allowGravity = false;
         this.door.body.setImmovable(true);
